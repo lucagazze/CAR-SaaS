@@ -7,6 +7,8 @@ interface ViewAsContextType {
   viewAsProfile: ClientProfile | null;
   setViewAsProfile: (p: ClientProfile | null | ((prev: ClientProfile | null) => ClientProfile | null)) => void;
   isViewingAs: boolean;
+  allClients: ClientProfile[];
+  loadingClients: boolean;
 }
 
 const ViewAsContext = createContext<ViewAsContextType | undefined>(undefined);
@@ -14,6 +16,8 @@ const ViewAsContext = createContext<ViewAsContextType | undefined>(undefined);
 export const ViewAsProvider = ({ children }: { children: React.ReactNode }) => {
   const { profile, loading: authLoading } = useAuth();
   const [viewAsProfile, setViewAsProfile] = useState<ClientProfile | null>(null);
+  const [allClients, setAllClients] = useState<ClientProfile[]>([]);
+  const [loadingClients, setLoadingClients] = useState<boolean>(false);
 
   useEffect(() => {
     // If authentication details are still loading, do nothing yet
@@ -22,9 +26,25 @@ export const ViewAsProvider = ({ children }: { children: React.ReactNode }) => {
     // Security check: if not logged in or NOT an admin, immediately clear impersonation state
     if (!profile || !profile.is_admin) {
       setViewAsProfile(null);
+      setAllClients([]);
       localStorage.removeItem('view_as_client_id');
       return;
     }
+
+    // Fetch all non-admin clients for admin impersonation dropdown
+    setLoadingClients(true);
+    supabase
+      .from('car_clients')
+      .select('*')
+      .order('business_name')
+      .then(({ data, error }) => {
+        setLoadingClients(false);
+        if (data && !error) {
+          setAllClients(data.filter(c => !c.is_admin));
+        } else if (error) {
+          console.error('Error fetching clients for view as:', error);
+        }
+      });
 
     const storedId = localStorage.getItem('view_as_client_id');
     if (!storedId) {
@@ -83,6 +103,8 @@ export const ViewAsProvider = ({ children }: { children: React.ReactNode }) => {
       viewAsProfile: isViewingAs ? viewAsProfile : null,
       setViewAsProfile: handleSetProfile,
       isViewingAs,
+      allClients,
+      loadingClients,
     }}>
       {children}
     </ViewAsContext.Provider>
@@ -96,7 +118,9 @@ export const useViewAs = () => {
     return {
       viewAsProfile: null,
       setViewAsProfile: () => {},
-      isViewingAs: false
+      isViewingAs: false,
+      allClients: [],
+      loadingClients: false,
     };
   }
   return ctx;

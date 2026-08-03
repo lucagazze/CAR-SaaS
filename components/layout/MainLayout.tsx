@@ -57,6 +57,7 @@ class RouteErrorBoundary extends React.Component<{ children: React.ReactNode }, 
 }
 import { Menu, Sun, Moon } from 'lucide-react';
 import { Sidebar } from './Sidebar';
+import { AdminClientSelector } from './AdminClientSelector';
 import { useAuth } from '../../contexts/AuthContext';
 import { AIChatFloat } from '../AIChatFloat';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -309,47 +310,49 @@ export const MainLayout = () => {
       </div>
 
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden h-screen relative print:overflow-visible print:h-auto">
-        {/* Compact header — fixed so it never scrolls away on mobile/tablet/narrow desktop */}
-        <div className="print:hidden xl:hidden h-14 border-b border-black/[0.06] dark:border-white/[0.05] flex items-center justify-between px-4 bg-white/80 dark:bg-[#161618]/80 backdrop-blur-xl fixed top-0 inset-x-0 z-[200]">
-          <div className="flex items-center">
+        {/* Header bar — top navigation bar for mobile and desktop */}
+        <div className="print:hidden h-14 border-b border-black/[0.06] dark:border-white/[0.05] flex items-center justify-between px-4 sm:px-6 bg-white/80 dark:bg-[#161618]/80 backdrop-blur-xl shrink-0 z-[200]">
+          <div className="flex items-center gap-2">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="p-2 -ml-1.5 rounded-[8px] text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/10 transition-all relative"
+              className="xl:hidden p-2 -ml-1.5 rounded-[8px] text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/10 transition-all relative"
             >
               <Menu className="w-[18px] h-[18px]" />
               {unreadCount > 0 && (
                 <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-zinc-950 animate-pulse" />
               )}
             </button>
-            <span className="ml-2 text-[15px] font-bold text-zinc-900 dark:text-white tracking-tight uppercase">
+            <span className="xl:hidden text-[15px] font-bold text-zinc-900 dark:text-white tracking-tight uppercase">
               ALGORITMIA <span className="text-violet-500 ml-0.5">GESTIÓN</span>
             </span>
           </div>
 
-          <button
-            onClick={toggleDarkMode}
-            className={`p-1.5 rounded-[8px] border shadow-sm transition-all ${
-              darkMode 
-                ? 'bg-zinc-950 border-white/10 text-zinc-350 hover:text-white hover:bg-zinc-900' 
-                : 'bg-white border-zinc-200 text-zinc-650 hover:text-zinc-900 hover:bg-zinc-50'
-            }`}
-            title="Cambiar apariencia"
-          >
-            {darkMode ? <Sun className="w-[18px] h-[18px] text-amber-400" /> : <Moon className="w-[18px] h-[18px]" />}
-          </button>
+          <div className="flex items-center gap-2 sm:gap-3 ml-auto">
+            <AdminClientSelector />
+
+            <button
+              onClick={toggleDarkMode}
+              className={`p-1.5 rounded-[8px] border shadow-sm transition-all ${
+                darkMode 
+                  ? 'bg-zinc-950 border-white/10 text-zinc-350 hover:text-white hover:bg-zinc-900' 
+                  : 'bg-white border-zinc-200 text-zinc-650 hover:text-zinc-900 hover:bg-zinc-50'
+              }`}
+              title="Cambiar apariencia"
+            >
+              {darkMode ? <Sun className="w-[18px] h-[18px] text-amber-400" /> : <Moon className="w-[18px] h-[18px]" />}
+            </button>
+          </div>
         </div>
 
         <div id="main-scroll-container" ref={scrollContainerRef} className={`flex-1 w-full print:overflow-visible print:h-auto print:p-6 ${
           location.pathname === '/mensajeria' || location.pathname === '/clientes'
-            ? 'overflow-hidden p-0 h-[calc(100dvh-56px)] xl:h-screen flex flex-col'
+            ? 'overflow-hidden p-0 h-[calc(100dvh-56px)] flex flex-col'
             : location.pathname === '/admin/meta'
               ? 'overflow-x-hidden overflow-y-auto px-2 py-3 sm:px-3 sm:py-4 md:p-5 xl:p-6 pb-8'
               : isFixedPage 
-                ? 'overflow-hidden p-4 md:p-6 h-[calc(100dvh-56px)] xl:h-screen flex flex-col'
+                ? 'overflow-hidden p-4 md:p-6 h-[calc(100dvh-56px)] flex flex-col'
                 : 'overflow-x-hidden overflow-y-auto px-3 py-3 sm:px-4 sm:py-4 md:p-6 xl:p-8 2xl:p-10 pb-8'
         }`}>
-          {/* Spacer so content starts below the fixed mobile header */}
-          <div className="h-14 xl:hidden" />
           {/* Feature announcements only appear after a new integration activates app sections. */}
           {activeProfile && (
             <WelcomeGuide profile={activeProfile} />
