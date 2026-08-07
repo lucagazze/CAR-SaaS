@@ -2,7 +2,14 @@ import { createClient } from '@supabase/supabase-js';
 
 const SUPABASE_URL = "https://czocbnyoenjbpxmcqobn.supabase.co";
 
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN6b2NibnlvZW5qYnB4bWNxb2JuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI4NDI5MTMsImV4cCI6MjA2ODQxODkxM30.pNgJnwAY8uxb6yCQilJfD92VNwsCkntr4Ie_os2lI44";
+// La clave publicable de Supabase. Es pública por diseño: viaja en el JavaScript
+// que recibe cualquier visitante, así que estar en el código no la expone.
+//
+// La que había antes era una clave legacy, y cuando se rotaron las claves del
+// proyecto esta línea fue el motivo de que el login devolviera 401 para todo el
+// mundo: cambiar la variable en Vercel no servía de nada porque el valor estaba
+// acá. Si alguna vez hay que rotarla de nuevo, se cambia en este archivo.
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || "sb_publishable_qqTTCyfpaM3SIM15AH_O8Q_fPoHatiI";
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
